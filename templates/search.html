@@ -5,15 +5,18 @@
 {% endblock %}
 
 {% block main %}
+
     <div id="search-results">
-        {% for latestBook in latestBooks %}
-            <a href="{{ url_for('book', isbn=latestBook.isbn) }}">
-                <div class="result-item">
-                    <h4>{{ latestBook.title }}</h4>
-                    <img class="self-align img-fluid" src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg">
-                    <p>By {{ latestBook.author }}</p>
+        {% for result in results %}
+        <a href="{{ url_for('book', isbn=result.isbn) }}">
+            <div class="media">
+                <img class="mr-3 img-fluid img-responsive" src="http://covers.openlibrary.org/b/isbn/{{ result.isbn }}-S.jpg">
+                <div class="media-body text-left">
+                    <h4>{{ result.title }}</h4>
+                    <p>By {{ result.author }}</p>
                 </div>
-            </a>
+            </div>
+        </a>
         {% endfor %}
     </div>
 

@@ -1,4 +1,5 @@
 import os
+import random
 
 from flask import Flask, flash, session, request, redirect, render_template, session, url_for, jsonify
 from flask_session import Session
@@ -27,7 +28,13 @@ db = scoped_session(sessionmaker(bind=engine))
 @login_required
 def index():
     """ Main Page """
-    return render_template("index.html")
+    # Creates a random alphabet character, could be from "a" to "z"
+    randomChar = chr(random.randint(97, 122))
+
+    # Query database with random alphabet character to get randomized books everytime index runs
+    randomBooks = db.execute("SELECT * FROM books WHERE author ILIKE CONCAT(:q, '%') OR title ILIKE CONCAT(:q, '%') LIMIT 9", {"q":randomChar}).fetchall()
+
+    return render_template("index.html", latestBooks=randomBooks)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -44,11 +51,11 @@ def login():
 
         # Check if username is provided
         if not username:
-            return apology("please type a username", 400)
+            return render_template('login.html', error="Please type a username")
 
         # Check if password is provided
         if not password:
-            return apology("must provide password", 403)
+            return render_template('login.html', error="Please provide a password")
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = :username",
@@ -58,8 +65,7 @@ def login():
             session["user_id"] = rows.id
             return redirect("/")
 
-        flash('Wrong username or password')
-        return redirect(url_for('login'))
+        return render_template('login.html', error="Wrong username or password")
 
     else:
         return render_template("login.html")
@@ -88,27 +94,27 @@ def register():
 
         # Check if username is provided
         if not username:
-            return apology("please type a username", 400)
+            return render_template('register.html', error="Please type a username")
 
         # Check if password is provided
         if not request.form.get("password"):
-            return apology("please type a password", 400)
+            return render_template('register.html', error="Please type a password")
 
         # Check if password matches in confirmation field
         if request.form.get("password") != request.form.get("confirmation"):
-            return apology("passwords do not match", 400)
+            return render_template('register.html', error="Passwords do not match")
 
         # Check if user exists in database
         user = db.execute('SELECT username FROM users WHERE username=:username', {"username":username}).fetchone()
         if user is not None:
-            return apology("user already exists", 400)
+            return render_template('register.html', error="User already exists")
 
         # Create hash from password
         hash = generate_password_hash(request.form.get("password"))
 
         # Store new user into database
         result = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) RETURNING id",
-                            {"username":username, "hash":hash}).fetchone()
+                            {"username":username, "hash":hash})
         db.commit()
 
         # Stores id in session
@@ -144,48 +150,69 @@ def autocomplete():
     # Search for matches in database that contain the query
     results = db.execute("SELECT title, author, isbn FROM books WHERE author ILIKE CONCAT('%', :q, '%') OR title ILIKE CONCAT('%', :q, '%') OR isbn ILIKE CONCAT('%', :q, '%') LIMIT 10", {"q":query}).fetchall()
     if not results:
-        error = "No results"
-        return render_template('index.html', error=error)
+        return render_template('index.html', error="No results")
 
     data = [dict(result) for result in results]
     return jsonify(data)
 
 @app.route("/search", methods=["GET"])
+@login_required
 def search():
     """ Looks for book information in database """
     # Query from user input
     query = request.args.get("q")
 
     # Search for matches in database that contain the query
-    results = db.execute("SELECT title, author, isbn FROM books WHERE author ILIKE CONCAT('%', :q, '%') OR title ILIKE CONCAT('%', :q, '%') OR isbn ILIKE CONCAT('%', :q, '%') LIMIT 10", {"q":query}).fetchall()
+    results = db.execute("SELECT title, author, isbn FROM books WHERE author ILIKE CONCAT('%', :q, '%') OR title ILIKE CONCAT('%', :q, '%') OR isbn ILIKE CONCAT('%', :q, '%') LIMIT 12", {"q":query}).fetchall()
     if not results:
-        error = "No results"
-        return render_template('index.html', error=error)
+        flask("No results")
+        return redirect(url_for('index', error="No results"))
 
-    return render_template("index.html", results=results)
+    return render_template("search.html", results=results)
 
-@app.route("/book/<isbn>", methods=["GET"])
+@app.route("/book/<isbn>", methods=["GET", "POST"])
+@login_required
 def book(isbn):
+    if request.method == 'POST':
+        # Check if review is not empty
+        review = request.form.get("review")
+        if not review:
+            print("No review")
+            return jsonify(False)
 
-    # Check if a book with the given ISBN exists
-    book = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).fetchone()
-    if not book:
-        return render_template("index.html", error="No such book")
+        # Check if rating is not empty
+        rating = request.form.get("rating")
+        if not rating:
+            return jsonify(False)
 
+        # Check if a review from user already exists for book
+        reviewExists = db.execute("SELECT id FROM reviews WHERE user_id=:user_id", {"user_id":session["user_id"]}).fetchone()
+        if reviewExists:
+            return jsonify(False)
 
-    # Query Goodreads API for book information
-    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": os.getenv("KEY"), "isbns": book.isbn})
-    resJson = res.json()
-    ratingsCount = resJson["books"][0]["work_ratings_count"]
-    ratings = resJson["books"][0]["average_rating"]
-    """
-    # Request data about book
-    imageRequest = requests.get("https://www.goodreads.com/search/index.xml", params={"key": os.getenv("KEY"), "q": book.isbn})
-    """
-    # Return book page with book data
-    return render_template("book.html", book=book, ratingsCount=ratingsCount, ratings=float(ratings))
+        # Insert review into database
+        insertReview = db.execute("INSERT INTO reviews (user_id, book_isbn, review, rating) VALUES(:user_id, :book_isbn, :review, :rating)", {"user_id":session["user_id"], "book_isbn":isbn, "review":review, "rating":rating})
+        db.commit()
+        # Return success message
+        return jsonify(True)
+
+    else:
+        # Check if a book with the given ISBN exists
+        book = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).fetchone()
+        if not book:
+            return render_template("index.html", error="No such book")
+
+        # Query Goodreads API for book information
+        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": os.getenv("KEY"), "isbns": book.isbn})
+        resJson = res.json()
+        ratingsCount = resJson["books"][0]["work_ratings_count"]
+        ratings = resJson["books"][0]["average_rating"]
+
+        # Return book page with book data
+        return render_template("book.html", book=book, ratingsCount=ratingsCount, ratings=float(ratings))
 
 @app.route("/api/<isbn>", methods=["GET"])
+@login_required
 def api(isbn):
     """
     return
@@ -198,3 +225,4 @@ def api(isbn):
     "average_score": 5.0
 }
     """
+

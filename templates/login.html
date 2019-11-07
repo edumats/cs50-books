@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-    <form action="/login" method="post" class="needs-validation" novalidate>
+    <form action="{{ url_for('login') }}" method="post" class="needs-validation" novalidate>
         <div class="form-group">
             <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text" required>
             <div class="invalid-feedback">
@@ -17,7 +17,7 @@
             <div class="invalid-feedback">
                 Please type your password.
             </div>
-            <a  href="/register"><small class="d-block form-text">New user? Register here</small></a>
+            <a  href="{{ url_for('register') }}"><small class="d-block form-text">New user? Register here</small></a>
         </div>
         <button class="btn btn-primary" type="submit">Log In</button>
     </form>
