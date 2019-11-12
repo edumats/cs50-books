@@ -175,6 +175,7 @@ def search():
 def book(isbn):
     if request.method == 'POST':
         # Check if review is not empty
+        # Needs to check if jsonify responses are being received
         review = request.form.get("review")
         if not review:
             print("No review")
@@ -225,4 +226,3 @@ def api(isbn):
     "average_score": 5.0
 }
     """
-
