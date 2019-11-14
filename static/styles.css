@@ -71,9 +71,12 @@ header
     align-self: center;
 }
 
+/* For adjusting the book covers on the search results */
 .img-fluid {
-    width: 100%;
-    height: auto;
+}
+
+.img-container {
+
 }
 /* Rating system star color of Books page */
 .checked {

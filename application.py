@@ -198,7 +198,7 @@ def book(isbn):
         return jsonify(True)
 
     else:
-        # Check if a book with the given ISBN exists
+        # Check if a book with the given ISBN exists in database
         book = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).fetchone()
         if not book:
             return render_template("index.html", error="No such book")
@@ -215,14 +215,23 @@ def book(isbn):
 @app.route("/api/<isbn>", methods=["GET"])
 @login_required
 def api(isbn):
-    """
-    return
-    {
-    "title": "Memory",
-    "author": "Doug Lloyd",
-    "year": 2015,
-    "isbn": "1632168146",
-    "review_count": 28,
-    "average_score": 5.0
-}
-    """
+    # Check if a book with the given ISBN exists in database
+    lookForBook = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).fetchone()
+    if not lookForBook:
+        return jsonify({"error": "Invalid ISBN"}), 422
+
+    # Query Goodreads API for book information
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": os.getenv("KEY"), "isbns": lookForBook.isbn})
+    resJson = res.json()
+    ratingsCount = resJson["books"][0]["work_ratings_count"]
+    ratings = resJson["books"][0]["average_rating"]
+
+    # Return results in JSON format
+    return jsonify({
+        "title": lookForBook.title,
+        "author": lookForBook.author,
+        "year": lookForBook.year,
+        "isbn": lookForBook.isbn,
+        "review_count": ratingsCount,
+        "average_score": ratings
+    })
