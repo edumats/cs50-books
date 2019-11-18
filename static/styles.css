@@ -25,10 +25,10 @@ nav .navbar-brand .green
 main .form-control
 {
     /* center form controls */
-    display: inline-block;
+    /*display: inline-block;*/
 
     /* override Bootstrap's 100% width for form controls */
-    width: auto;
+    /*width: auto;*/
 }
 
 main
@@ -51,9 +51,10 @@ header
     width: 100%;
 }
 
+/* Styling for book search results grid layout */
 #search-results {
     display:grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     grid-gap: 1rem;
 }
 
@@ -66,18 +67,12 @@ header
 .result-item :nth-child(2) {
     order: -1;
 }
+
 /* To counter flexbox behavior for streching images */
 .align-self {
     align-self: center;
 }
 
-/* For adjusting the book covers on the search results */
-.img-fluid {
-}
-
-.img-container {
-
-}
 /* Rating system star color of Books page */
 .checked {
     color: orange;
@@ -88,6 +83,7 @@ header
     flex-flow: row;
 }
 
+/* Refers to book cover image from "book" page */
 .item2 > img {
     width: 100%;
     max-height: 100%;

@@ -9,9 +9,9 @@
     <div id="search-results">
         {% for result in results %}
         <a href="{{ url_for('book', isbn=result.isbn) }}">
-            <div class="media">
+            <div class="media result-item">
                 <div class="img-container">
-                    <img class="mr-3 img-fluid img-responsive" src="http://covers.openlibrary.org/b/isbn/{{ result.isbn }}-S.jpg">
+                    <img class="mr-3 img-fluid img-responsive" src="http://covers.openlibrary.org/b/isbn/{{ result.isbn }}-M.jpg">
                 </div>
                 <div class="media-body text-left">
                     <h4>{{ result.title }}</h4>

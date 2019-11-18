@@ -213,7 +213,6 @@ def book(isbn):
         return render_template("book.html", book=book, ratingsCount=ratingsCount, ratings=float(ratings))
 
 @app.route("/api/<isbn>", methods=["GET"])
-@login_required
 def api(isbn):
     # Check if a book with the given ISBN exists in database
     lookForBook = db.execute("SELECT * FROM books WHERE isbn=:isbn", {"isbn": isbn}).fetchone()
