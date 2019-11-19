@@ -5,6 +5,7 @@
 {% endblock %}
 
 {% block main %}
+    <!-- Book Info Section -->
     <div class="container">
         <div class="row">
             <div class="item2 col-md-auto mr-3">
@@ -62,9 +63,19 @@
                 <p>{{ ratingsCount }} ratings</p>
                 <p>{{ book.year }}</p>
                 <p>ISBN: {{ book.isbn }}</p>
-                <!-- Book review sent on my website -->
-
             </div>
+        </div>
+    </div>
+
+    <!-- Book Reviews Section -->
+    <div class="container">
+        <div class="row">
+            <h2>Reviews</h2>
+            {% if reviews %}
+                <p>There are reviews</p>
+            {% else %}
+                <p>There are no reviews for this book</p>
+            {% endif %}
         </div>
     </div>
     <form action="{{ url_for('book', isbn=book.isbn) }}" method="post" id="submit-form" class="needs-validation mt-5" novalidate>
@@ -85,7 +96,7 @@
                     <option value=3>3</option>
                     <option value=4>4</option>
                     <option value=5>5</option>
-            </select>
+                </select>
             </div>
             <span class="invalid-feedback form-text">
                 Please rate the book

@@ -209,8 +209,12 @@ def book(isbn):
         ratingsCount = resJson["books"][0]["work_ratings_count"]
         ratings = resJson["books"][0]["average_rating"]
 
-        # Return book page with book data
-        return render_template("book.html", book=book, ratingsCount=ratingsCount, ratings=float(ratings))
+        getReviews = db.execute("SELECT * FROM reviews WHERE book_isbn=:isbn", {"isbn": isbn}).fetchall()
+        if not getReviews:
+            # Return book page with book data
+            return render_template("book.html", book=book, review=False, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
+
+        return render_template("book.html", book=book, review=True, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
 
 @app.route("/api/<isbn>", methods=["GET"])
 def api(isbn):
