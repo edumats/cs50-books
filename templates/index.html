@@ -10,7 +10,9 @@
             <a href="{{ url_for('book', isbn=latestBook.isbn) }}">
                 <div class="result-item">
                     <h4>{{ latestBook.title }}</h4>
-                    <img class="self-align img-fluid" src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg">
+                    <div class="img-container">
+                        <img class="mr-3 img-fluid img-responsive" src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg">
+                    </div>
                     <p>By {{ latestBook.author }}</p>
                 </div>
             </a>

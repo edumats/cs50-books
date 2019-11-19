@@ -114,11 +114,12 @@ def register():
 
         # Store new user into database
         result = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) RETURNING id",
-                            {"username":username, "hash":hash})
-        db.commit()
-
+                            {"username":username, "hash":hash}).fetchone()
         # Stores id in session
         session["user_id"] = result[0]
+
+        # Commits changes to database
+        db.commit()
 
         # Redirect user to home page
         return redirect("/")
@@ -143,7 +144,7 @@ def check():
 
 @app.route("/autocomplete", methods=["GET"])
 def autocomplete():
-    """ Looks for book information in database """
+    """ Looks for book information in database / Not being used in current project """
     # Query from user input
     query = request.args.get("q")
 
@@ -165,8 +166,8 @@ def search():
     # Search for matches in database that contain the query
     results = db.execute("SELECT title, author, isbn FROM books WHERE author ILIKE CONCAT('%', :q, '%') OR title ILIKE CONCAT('%', :q, '%') OR isbn ILIKE CONCAT('%', :q, '%') LIMIT 12", {"q":query}).fetchall()
     if not results:
-        flask("No results")
-        return redirect(url_for('index', error="No results"))
+        flash("No results")
+        return redirect(url_for('index'))
 
     return render_template("search.html", results=results)
 
@@ -178,24 +179,27 @@ def book(isbn):
         # Needs to check if jsonify responses are being received
         review = request.form.get("review")
         if not review:
-            print("No review")
-            return jsonify(False)
+            flash("Please write a review")
+            return redirect(url_for('book', isbn=isbn))
 
         # Check if rating is not empty
         rating = request.form.get("rating")
         if not rating:
-            return jsonify(False)
+            flash("You must rate the book")
+            return redirect(url_for('book', isbn=isbn))
 
         # Check if a review from user already exists for book
-        reviewExists = db.execute("SELECT id FROM reviews WHERE user_id=:user_id", {"user_id":session["user_id"]}).fetchone()
+        reviewExists = db.execute("SELECT id FROM reviews WHERE user_id=:user_id AND book_isbn=:isbn", {"user_id":session["user_id"], "isbn":isbn}).fetchone()
         if reviewExists:
-            return jsonify(False)
+            flash("You already posted a review for this book")
+            return redirect(url_for('book', isbn=isbn))
 
         # Insert review into database
         insertReview = db.execute("INSERT INTO reviews (user_id, book_isbn, review, rating) VALUES(:user_id, :book_isbn, :review, :rating)", {"user_id":session["user_id"], "book_isbn":isbn, "review":review, "rating":rating})
         db.commit()
         # Return success message
-        return jsonify(True)
+        flash("Review posted")
+        return redirect(url_for('book', isbn=isbn))
 
     else:
         # Check if a book with the given ISBN exists in database
@@ -209,12 +213,15 @@ def book(isbn):
         ratingsCount = resJson["books"][0]["work_ratings_count"]
         ratings = resJson["books"][0]["average_rating"]
 
-        getReviews = db.execute("SELECT * FROM reviews WHERE book_isbn=:isbn", {"isbn": isbn}).fetchall()
+        # Query for reviews
+        getReviews = db.execute("SELECT review, rating, username FROM reviews JOIN users ON reviews.user_id = users.id WHERE book_isbn=:isbn", {"isbn": isbn}).fetchall()
         if not getReviews:
-            # Return book page with book data
-            return render_template("book.html", book=book, review=False, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
+            # Return book page without reviews
+            return render_template("book.html", book=book, reviews=False, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
 
-        return render_template("book.html", book=book, review=True, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
+        # Return book page with reviews
+        return render_template("book.html", book=book, reviews=getReviews, ratingsCount=format(ratingsCount, ',d'), ratings=float(ratings))
+
 
 @app.route("/api/<isbn>", methods=["GET"])
 def api(isbn):
