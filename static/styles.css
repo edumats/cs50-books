@@ -1,53 +1,48 @@
-nav .navbar-brand
-{
+nav .navbar-brand {
     /* size for brand */
     font-size: xx-large;
 }
 
 /* colors for brand */
-nav .navbar-brand .blue
-{
+nav .navbar-brand .blue {
     color: #537fbe;
 }
-nav .navbar-brand .red
-{
+nav .navbar-brand .red {
     color: #ea433b;
 }
-nav .navbar-brand .yellow
-{
+nav .navbar-brand .yellow {
     color: #f5b82e;
 }
-nav .navbar-brand .green
-{
+nav .navbar-brand .green {
     color: #2e944b;
 }
 
-main .form-control
-{
-    /* center form controls */
-    /*display: inline-block;*/
+main .login {
+    /* center form controls for login/register*/
+    display: inline-block;
 
     /* override Bootstrap's 100% width for form controls */
-    /*width: auto;*/
+    width: auto;
 }
 
-main
-{
+.input-review {
+    text-align: left;
+}
+
+main {
     /* scroll horizontally as needed */
     overflow-x: auto;
 
     /* center contents */
-    /*text-align: center;*/
+    text-align: center;
 }
 
-main img
-{
+main img {
     /* constrain images on small screens */
     max-width: 100%;
 }
 
-header
-{
+header {
     width: 100%;
 }
 
@@ -65,6 +60,7 @@ header
 }
 
 .result-item :nth-child(2) {
+    /* In book cards images comes before title, although title is first in html */
     order: -1;
 }
 
@@ -87,4 +83,9 @@ header
 .item2 > img {
     width: 100%;
     max-height: 100%;
+}
+
+/* Border when there is a review on book page */
+.review {
+    border-bottom: 1px solid gray;
 }
