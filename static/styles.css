@@ -1,3 +1,8 @@
+a, a:hover, a:focus, a:active {
+    color: black;
+    text-decoration: none;
+}
+
 nav .navbar-brand {
     /* size for brand */
     font-size: xx-large;
@@ -40,6 +45,8 @@ main {
 main img {
     /* constrain images on small screens */
     max-width: 100%;
+    object-fit: cover;
+    height: 30vh;
 }
 
 header {
@@ -50,18 +57,31 @@ header {
 #search-results {
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    grid-gap: 1rem;
 }
 
 .result-item {
     display: flex;
     flex-flow: column;
-    padding: 2rem;
+    margin: 2rem;
+
 }
 
-.result-item :nth-child(2) {
+#title-link {
+    margin-top: 0.7rem;
+}
+
+.result-item > p {
+    color: #555;
+}
+
+#img-link {
     /* In book cards images comes before title, although title is first in html */
     order: -1;
+    text-align: center;
+}
+
+.result-item > a:hover{
+    color: #c45500 !important;
 }
 
 /* To counter flexbox behavior for streching images */

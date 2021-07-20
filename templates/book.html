@@ -81,7 +81,7 @@
             <p class="text-left">There are no reviews for this book</p>
         {% endif %}
     </div>
-    <div class="container my-2">
+    <div class="container my-5">
         <form action="{{ url_for('book', isbn=book.isbn) }}" method="post" id="submit-form" class="needs-validation" novalidate>
             <div class="form-group row input-review">
                 <label for="review">What did you think?</label>

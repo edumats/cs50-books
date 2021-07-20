@@ -7,15 +7,15 @@
 {% block main %}
     <div id="search-results">
         {% for latestBook in latestBooks %}
-            <a href="{{ url_for('book', isbn=latestBook.isbn) }}">
-                <div class="result-item">
+            <div class="result-item">
+                <a id="title-link" href="{{ url_for('book', isbn=latestBook.isbn) }}">
                     <h4>{{ latestBook.title }}</h4>
-                    <div class="img-container">
-                        <img class="mr-3 img-fluid img-responsive" src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg" alt="book cover">
-                    </div>
-                    <p>By {{ latestBook.author }}</p>
-                </div>
-            </a>
+                </a>
+                <a id="img-link" href="{{ url_for('book', isbn=latestBook.isbn) }}">
+                    <img src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg" alt="{{ latestBook.title }}">
+                </a>
+                <p>By {{ latestBook.author }}</p>
+            </div>
         {% endfor %}
     </div>
 
