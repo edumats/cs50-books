@@ -74,7 +74,7 @@ header {
     color: #555;
 }
 
-#img-link {
+.img-link {
     /* In book cards images comes before title, although title is first in html */
     order: -1;
     text-align: center;
@@ -89,6 +89,11 @@ header {
     align-self: center;
 }
 
+/* Book details page */
+
+.book-details-cover {
+    height: 100%;
+}
 /* Rating system star color of Books page */
 .checked {
     color: orange;

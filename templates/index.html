@@ -11,7 +11,7 @@
                 <a id="title-link" href="{{ url_for('book', isbn=latestBook.isbn) }}">
                     <h4>{{ latestBook.title }}</h4>
                 </a>
-                <a id="img-link" href="{{ url_for('book', isbn=latestBook.isbn) }}">
+                <a class="img-link" href="{{ url_for('book', isbn=latestBook.isbn) }}">
                     <img src="http://covers.openlibrary.org/b/isbn/{{ latestBook.isbn }}-M.jpg" alt="{{ latestBook.title }}">
                 </a>
                 <p>By {{ latestBook.author }}</p>
